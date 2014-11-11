@@ -1,0 +1,26 @@
+{
+  "name": "s3prefixed",
+  "version": "0.0.1",
+  "description": "ls and cp operations in prefixed buckets",
+  "main": "index.js",
+  "bin": {
+    "s3prefixed": "s3prefixed.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapbox/s3prefixed.git"
+  },
+  "author": "Mapbox",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mapbox/s3prefixed/issues"
+  },
+  "homepage": "https://github.com/mapbox/s3prefixed",
+  "dependencies": {
+    "aws-sdk": "^2.0.25",
+    "queue-async": "^1.0.7"
+  }
+}
