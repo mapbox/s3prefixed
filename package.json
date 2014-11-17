@@ -1,6 +1,6 @@
 {
   "name": "s3prefixed",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ls and cp operations in prefixed buckets",
   "main": "index.js",
   "bin": {
