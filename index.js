@@ -10,9 +10,14 @@ function ListStream(bucket, key) {
   Readable.call(this);
   this.bucket = bucket;
   this.key = key;
+  this.buffer = [];
+  this.loaded = false;
 }
 
 ListStream.prototype._read = function() {
+  if (this.buffer.length) return this.push(this.buffer.shift());
+  else if (this.loaded) return this.push(null);
+
   var stream = this;
   var q = queue();
   var prefix;
@@ -25,8 +30,9 @@ ListStream.prototype._read = function() {
   }
 
   q.await(function(err) {
-    if (err) stream.emit('error', err);
-    stream.push(null);
+    if (err) return stream.emit('error', err);
+    stream.loaded = true;
+    stream.push(stream.buffer.shift());
   });
 };
 
@@ -81,7 +87,6 @@ function listObjects(stream, prefix, callback) {
       Prefix: prefix
     };
     if (marker) params.Marker = marker;
-
     s3.listObjects(params, function(err, data) {
       if (err) return callback(err);
       data.Contents.forEach(function(item) {
@@ -93,9 +98,9 @@ function listObjects(stream, prefix, callback) {
           '\t' + item.Key,
           '\n'
         ].join('');
-        stream.push(item);
+        stream.buffer.push(item);
       });
-      if (data.isTruncated) return ls(data.NextMarker);
+      if (data.IsTruncated) return ls(data.Contents.pop().Key);
       callback();
     });
   }
