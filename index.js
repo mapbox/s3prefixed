@@ -47,8 +47,8 @@ ListStream.prototype._read = function() {
   var prefix;
   var prefixer = new Prefixer(stream.key);
 
-  for (var i = 0; i <= prefixer.base; i++) {
-    for (var j = 0; j <= prefixer.base; j++) {
+  for (var i = 0; i < prefixer.base; i++) {
+    for (var j = 0; j < prefixer.base; j++) {
       prefix = prefixer.prefix(i, j);
       q.defer(listObjects, stream, prefix);
     }
@@ -71,8 +71,8 @@ function copy(bucket, key, destination, callback) {
 
   var prefixer = new Prefixer(key);
 
-  for (var i = 0; i <= prefixer.base; i++) {
-    for (var j = 0; j <= prefixer.base; j++) {
+  for (var i = 0; i < prefixer.base; i++) {
+    for (var j = 0; j < prefixer.base; j++) {
       prefix = prefixer.prefix(i, j);
       q.defer(copyObject, bucket, prefix, destination);
     }
