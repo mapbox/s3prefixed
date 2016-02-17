@@ -43,3 +43,11 @@ tape('[{prefix4}] prefixer should return the correct max val', function(assert) 
     assert.equal(prefixer.prefix(255, 255), 'ffff/test');
     assert.end();
 });
+
+tape('[{prefix4}] prefixer should pad correctly', function(assert) {
+    var prefixkey = '{prefix4}/test';
+    var prefixer = new s3prefix.Prefixer(prefixkey);
+    assert.equal(prefixer.base, 256, 'Base should be256');
+    assert.equal(prefixer.prefix(1, 1), '0101/test');
+    assert.end();
+});

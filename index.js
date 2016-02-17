@@ -35,7 +35,7 @@ Prefixer.prototype.prefix = function(i, j) {
         return str.length < 2 ? '0' + str : str;
     }
     return this.key.replace('{prefix}', i.toString(16) + j.toString(16))
-        .replace('{prefix4}', pad(i.toString(16) + j.toString(16)));
+        .replace('{prefix4}', pad(i.toString(16)) + pad(j.toString(16)));
 }
 
 ListStream.prototype._read = function() {
