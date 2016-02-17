@@ -14,20 +14,28 @@ function ListStream(bucket, key) {
   this.loaded = false;
 }
 
-function getBase(prefix) {
+
+
+function Prefixer(key) {
   var p4Regex = /^.*{prefix4}.*$/;
   var pRegex = /^.*{prefix}.*$/;
-  if (pRegex.exec(prefix)) {
-    return 16;
-  } else if (p4Regex.exec(prefix)) {
-    return 256;
+  this.key = key;
+
+  if (pRegex.exec(key)) {
+    this.base = 16;
+  } else if (p4Regex.exec(key)) {
+    this.base = 256;
   } else {
-    return 1;
+    this.base = 1;
   }
 }
 
-function pad(str) {
-  return str.length < 2 ? '0' + str : str;
+Prefixer.prototype.prefix = function(i, j) {
+    function pad(str) {
+        return str.length < 2 ? '0' + str : str;
+    }
+    return this.key.replace('{prefix}', i.toString(16) + j.toString(16))
+        .replace('{prefix4}', pad(i.toString(16) + j.toString(16)));
 }
 
 ListStream.prototype._read = function() {
@@ -37,13 +45,11 @@ ListStream.prototype._read = function() {
   var stream = this;
   var q = queue();
   var prefix;
-  var base = getBase(stream.key);
+  var prefixer = new Prefixer(stream.key);
 
-  for (var i = 0; i <= base; i++) {
-    for (var j = 0; j <= base; j++) {
-      prefix = stream.key
-        .replace('{prefix}', i.toString(16) + j.toString(16))
-        .replace('{prefix4}', pad(i.toString(16) + j.toString(16)));
+  for (var i = 0; i <= prefixer.base; i++) {
+    for (var j = 0; j <= prefixer.base; j++) {
+      prefix = prefixer.prefix(i, j);
       q.defer(listObjects, stream, prefix);
     }
   }
@@ -63,13 +69,11 @@ function copy(bucket, key, destination, callback) {
   var q = queue();
   var prefix;
 
-  var base = getBase(key);
+  var prefixer = new Prefixer(key);
 
   for (var i = 0; i <= base; i++) {
     for (var j = 0; j <= base; j++) {
-      prefix = key
-        .replace('{prefix}', i.toString(16) + j.toString(16))
-        .replace('{prefix4}', pad(i.toString(16) + j.toString(16)));
+      prefix = prefixer.prefix(i, j);
       q.defer(copyObject, bucket, prefix, destination);
     }
   }
@@ -137,5 +141,6 @@ function pad(num) {
 
 module.exports = {
   ls: list,
-  cp: copy
+  cp: copy,
+  Prefixer: Prefixer
 };

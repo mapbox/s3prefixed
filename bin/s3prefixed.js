@@ -26,7 +26,7 @@ if (uri.pathname === '/') {
   console.error('Error: Must specify a key in the s3 url');
   process.exit(1);
 }
-if (uri.pathname.indexOf('{prefix}') === -1) {
+if (uri.pathname.indexOf('{prefix}') === -1 &&  uri.pathname.indexOf('{prefix4}') === -1) {
   console.error('Error: Must specify the location of the {prefix} in the s3 url');
   process.exit(1);
 }
