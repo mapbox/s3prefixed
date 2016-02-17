@@ -14,6 +14,22 @@ function ListStream(bucket, key) {
   this.loaded = false;
 }
 
+function getBase(prefix) {
+  var p4Regex = /^{prefix4}$/;
+  var pRegex = /^{prefix}$/;
+  if (pRegex.exec(prefix)) {
+    return 16;
+  } else if (p4Regex.exec(prefix)) {
+    return 256;
+  } else {
+    return 1;
+  }
+}
+
+function pad(str) {
+  return str.length < 2 ? '0' + str : str;
+}
+
 ListStream.prototype._read = function() {
   if (this.buffer.length) return this.push(this.buffer.shift());
   else if (this.loaded) return this.push(null);
@@ -21,10 +37,13 @@ ListStream.prototype._read = function() {
   var stream = this;
   var q = queue();
   var prefix;
+  var base = getBase(stream.key);
 
-  for (var i = 0; i <= 16; i++) {
-    for (var j = 0; j <= 16; j++) {
-      prefix = stream.key.replace('{prefix}', i.toString(16) + j.toString(16));
+  for (var i = 0; i <= base; i++) {
+    for (var j = 0; j <= base; j++) {
+      prefix = stream.key
+        .replace('{prefix}', i.toString(16) + j.toString(16))
+        .replace('{prefix4}', pad(i.toString(16) + j.toString(16)));
       q.defer(listObjects, stream, prefix);
     }
   }
@@ -44,9 +63,13 @@ function copy(bucket, key, destination, callback) {
   var q = queue();
   var prefix;
 
-  for (var i = 0; i <= 16; i++) {
-    for (var j = 0; j <= 16; j++) {
-      prefix = key.replace('{prefix}', i.toString(16) + j.toString(16));
+  var base = getBase(key);
+
+  for (var i = 0; i <= base; i++) {
+    for (var j = 0; j <= base; j++) {
+      prefix = key
+        .replace('{prefix}', i.toString(16) + j.toString(16))
+        .replace('{prefix4}', pad(i.toString(16) + j.toString(16)));
       q.defer(copyObject, bucket, prefix, destination);
     }
   }
