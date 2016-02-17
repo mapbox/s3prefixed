@@ -15,8 +15,8 @@ function ListStream(bucket, key) {
 }
 
 function getBase(prefix) {
-  var p4Regex = /^{prefix4}$/;
-  var pRegex = /^{prefix}$/;
+  var p4Regex = /^.*{prefix4}.*$/;
+  var pRegex = /^.*{prefix}.*$/;
   if (pRegex.exec(prefix)) {
     return 16;
   } else if (p4Regex.exec(prefix)) {
