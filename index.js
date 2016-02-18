@@ -43,7 +43,7 @@ ListStream.prototype._read = function() {
   else if (this.loaded) return this.push(null);
 
   var stream = this;
-  var q = queue();
+  var q = queue(10);
   var prefix;
   var prefixer = new Prefixer(stream.key);
 
@@ -66,7 +66,7 @@ function list(bucket, key) {
 }
 
 function copy(bucket, key, destination, callback) {
-  var q = queue();
+  var q = queue(10);
   var prefix;
 
   var prefixer = new Prefixer(key);
