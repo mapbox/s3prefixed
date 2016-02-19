@@ -14,17 +14,42 @@ function ListStream(bucket, key) {
   this.loaded = false;
 }
 
+
+
+function Prefixer(key) {
+  var p4Regex = /^.*{prefix4}.*$/;
+  var pRegex = /^.*{prefix}.*$/;
+  this.key = key;
+
+  if (pRegex.exec(key)) {
+    this.base = 16;
+  } else if (p4Regex.exec(key)) {
+    this.base = 256;
+  } else {
+    this.base = 1;
+  }
+}
+
+Prefixer.prototype.prefix = function(i, j) {
+    function pad(str) {
+        return str.length < 2 ? '0' + str : str;
+    }
+    return this.key.replace('{prefix}', i.toString(16) + j.toString(16))
+        .replace('{prefix4}', pad(i.toString(16)) + pad(j.toString(16)));
+}
+
 ListStream.prototype._read = function() {
   if (this.buffer.length) return this.push(this.buffer.shift());
   else if (this.loaded) return this.push(null);
 
   var stream = this;
-  var q = queue();
+  var q = queue(10);
   var prefix;
+  var prefixer = new Prefixer(stream.key);
 
-  for (var i = 0; i <= 16; i++) {
-    for (var j = 0; j <= 16; j++) {
-      prefix = stream.key.replace('{prefix}', i.toString(16) + j.toString(16));
+  for (var i = 0; i < prefixer.base; i++) {
+    for (var j = 0; j < prefixer.base; j++) {
+      prefix = prefixer.prefix(i, j);
       q.defer(listObjects, stream, prefix);
     }
   }
@@ -41,12 +66,14 @@ function list(bucket, key) {
 }
 
 function copy(bucket, key, destination, callback) {
-  var q = queue();
+  var q = queue(10);
   var prefix;
 
-  for (var i = 0; i <= 16; i++) {
-    for (var j = 0; j <= 16; j++) {
-      prefix = key.replace('{prefix}', i.toString(16) + j.toString(16));
+  var prefixer = new Prefixer(key);
+
+  for (var i = 0; i < prefixer.base; i++) {
+    for (var j = 0; j < prefixer.base; j++) {
+      prefix = prefixer.prefix(i, j);
       q.defer(copyObject, bucket, prefix, destination);
     }
   }
@@ -114,5 +141,6 @@ function pad(num) {
 
 module.exports = {
   ls: list,
-  cp: copy
+  cp: copy,
+  Prefixer: Prefixer
 };

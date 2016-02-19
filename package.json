@@ -7,7 +7,7 @@
     "s3prefixed": "bin/s3prefixed.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "eslint index.js bin/s3prefixed.js && tape test/*.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,9 @@
   "dependencies": {
     "aws-sdk": "^2.0.25",
     "queue-async": "^1.0.7"
+  },
+  "devDependencies": {
+    "tape": "^3.0.1",
+    "eslint": "~1.00.0"
   }
 }
