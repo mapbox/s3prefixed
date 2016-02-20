@@ -14,30 +14,6 @@ function ListStream(bucket, key) {
   this.loaded = false;
 }
 
-
-
-function Prefixer(key) {
-  var p4Regex = /^.*{prefix4}.*$/;
-  var pRegex = /^.*{prefix}.*$/;
-  this.key = key;
-
-  if (pRegex.exec(key)) {
-    this.base = 16;
-  } else if (p4Regex.exec(key)) {
-    this.base = 256;
-  } else {
-    this.base = 1;
-  }
-}
-
-Prefixer.prototype.prefix = function(i, j) {
-    function pad(str) {
-        return str.length < 2 ? '0' + str : str;
-    }
-    return this.key.replace('{prefix}', i.toString(16) + j.toString(16))
-        .replace('{prefix4}', pad(i.toString(16)) + pad(j.toString(16)));
-}
-
 ListStream.prototype._read = function() {
   if (this.buffer.length) return this.push(this.buffer.shift());
   else if (this.loaded) return this.push(null);
