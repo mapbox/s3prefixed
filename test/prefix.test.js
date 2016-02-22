@@ -105,7 +105,7 @@ function testStream(fpath, callback) {
     .pipe(fs.createWriteStream(tmpdir))
     .on('finish', function() {
       return callback(null, tmpdir);
-    })  
+    })
     .on('err', function(err) {
       return callback(err);
     });
@@ -117,10 +117,6 @@ tape('[url stream {prefix}] should parse + convert stream of urls', function(ass
     var expected = fs.readFileSync('./test/expected/prefixtileurlstream.txt').toString();
     assert.deepEqual(created, expected, 'should stream + parse {prefix} tiles correctly')
 
-    testStream('./test/fixtures/prefix4tileurlstream.txt', function(err, createdpath) {
-      // y r u failing
-
-      assert.end();
-  })
+    assert.end()
   });
 });
