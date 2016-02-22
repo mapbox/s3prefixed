@@ -4,7 +4,8 @@
   "description": "ls and cp operations in prefixed buckets",
   "main": "index.js",
   "bin": {
-    "s3prefixed": "bin/s3prefixed.js"
+    "s3prefixed": "bin/s3prefixed.js",
+    "s3prixfixe": "bin/s3prixfixe.js"
   },
   "scripts": {
     "test": "eslint index.js bin/s3prefixed.js && tape test/*.js"
