@@ -57,7 +57,7 @@ ListStream.prototype._read = function() {
   q.await(function(err) {
     if (err) return stream.emit('error', err);
     stream.loaded = true;
-    stream.push(stream.buffer.shift());
+    stream.push(stream.buffer.shift() || null);
   });
 };
 
