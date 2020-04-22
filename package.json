@@ -4,7 +4,8 @@
   "description": "ls and cp operations in prefixed buckets",
   "main": "index.js",
   "bin": {
-    "s3prefixed": "bin/s3prefixed.js"
+    "s3prefixed": "bin/s3prefixed.js",
+    "s3prixfixe": "bin/s3prixfixe.js"
   },
   "scripts": {
     "test": "eslint index.js bin/s3prefixed.js && tape test/*.js"
@@ -21,7 +22,8 @@
   "homepage": "https://github.com/mapbox/s3prefixed",
   "dependencies": {
     "aws-sdk": "^2.0.25",
-    "queue-async": "^1.0.7"
+    "queue-async": "^1.0.7",
+    "split": "^0.3.3"
   },
   "devDependencies": {
     "tape": "^3.0.1",

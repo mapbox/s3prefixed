@@ -2,8 +2,11 @@ var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 var queue = require('queue-async');
 var Readable = require('stream').Readable;
+var Transform = require('stream').Transform;
 var util = require('util');
 var fs = require('fs');
+var util = require('util');
+var s3PrixeFixe = require('./lib/prix-fixe.js');
 
 util.inherits(ListStream, Readable);
 function ListStream(bucket, key) {
@@ -14,30 +17,6 @@ function ListStream(bucket, key) {
   this.loaded = false;
 }
 
-
-
-function Prefixer(key) {
-  var p4Regex = /^.*{prefix4}.*$/;
-  var pRegex = /^.*{prefix}.*$/;
-  this.key = key;
-
-  if (pRegex.exec(key)) {
-    this.base = 16;
-  } else if (p4Regex.exec(key)) {
-    this.base = 256;
-  } else {
-    this.base = 1;
-  }
-}
-
-Prefixer.prototype.prefix = function(i, j) {
-    function pad(str) {
-        return str.length < 2 ? '0' + str : str;
-    }
-    return this.key.replace('{prefix}', i.toString(16) + j.toString(16))
-        .replace('{prefix4}', pad(i.toString(16)) + pad(j.toString(16)));
-}
-
 ListStream.prototype._read = function() {
   if (this.buffer.length) return this.push(this.buffer.shift());
   else if (this.loaded) return this.push(null);
@@ -45,7 +24,7 @@ ListStream.prototype._read = function() {
   var stream = this;
   var q = queue(10);
   var prefix;
-  var prefixer = new Prefixer(stream.key);
+  var prefixer = new s3PrixeFixe.Prefixer(stream.key);
 
   for (var i = 0; i < prefixer.base; i++) {
     for (var j = 0; j < prefixer.base; j++) {
@@ -69,7 +48,7 @@ function copy(bucket, key, destination, callback) {
   var q = queue(10);
   var prefix;
 
-  var prefixer = new Prefixer(key);
+  var prefixer = new s3PrixeFixe.Prefixer(key);
 
   for (var i = 0; i < prefixer.base; i++) {
     for (var j = 0; j < prefixer.base; j++) {
@@ -139,8 +118,28 @@ function pad(num) {
   return ('00' + num).slice(-2);
 }
 
+
+util.inherits(ConvertStream, Transform);
+
+function ConvertStream() {
+  Transform.call(this);
+}
+
+ConvertStream.prototype._transform = function(chunk, enc, callback) {
+  var ConvertStream = this;
+  if (!chunk.toString()) { return callback() }
+  chunk = chunk.toString();
+  s3PrixeFixe.pathToZXY(chunk, function(err, zxy) {
+    if (err) callback(err);
+    var prefix = s3PrixeFixe.xyToPrefix(chunk, zxy[1], zxy[2]);
+    ConvertStream.push(prefix.toString() + '\n');
+    return callback();
+  });
+};
+
 module.exports = {
   ls: list,
   cp: copy,
-  Prefixer: Prefixer
+  Prefixer: s3PrixeFixe.Prefixer,
+  ConvertStream: function() { return new ConvertStream(); }
 };
